@@ -34,7 +34,7 @@ def package_files(directory):
 
 setup(
     name='synonym_dict',
-    version="0.1.0",
+    version="0.1.1",
     packages=packages,
     author="Brandon Kuczenski",
     author_email="bkuczenski@ucsb.edu",
@@ -43,7 +43,7 @@ setup(
     url="https://github.com/bkuczenski/synonym_dict",
     long_description_content_type='text/markdown',
     long_description=open('README.md').read(),
-    description='your_name_here',
+    description='A class that allows retrieval of a given object by any of its synonyms',
     classifiers=[
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Developers',
@@ -54,7 +54,6 @@ setup(
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7'
         'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering :: Information Analysis',
     ],
