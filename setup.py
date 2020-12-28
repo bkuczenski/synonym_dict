@@ -1,11 +1,4 @@
-from setuptools import setup
-import os
-
-packages = []
-root_dir = os.path.dirname(__file__)
-if root_dir:
-    os.chdir(root_dir)
-
+from setuptools import setup, find_packages
 
 # TODO
 # Change `author`
@@ -14,28 +7,10 @@ if root_dir:
 # Change the PyPI classifiers: https://pypi.org/pypi?%3Aaction=list_classifiers
 
 
-# Probably should be changed, __init__.py is no longer required for Python 3
-for dirpath, dirnames, filenames in os.walk('synonym_dict'):
-    # Ignore dirnames that start with '.'
-    if '__init__.py' in filenames:
-        pkg = dirpath.replace(os.path.sep, '.')
-        if os.path.altsep:
-            pkg = pkg.replace(os.path.altsep, '.')
-        packages.append(pkg)
-
-
-def package_files(directory):
-    paths = []
-    for (path, directories, filenames) in os.walk(directory):
-        for filename in filenames:
-            paths.append(os.path.join('..', path, filename))
-    return paths
-
-
 setup(
     name='synonym_dict',
-    version="0.1.1",
-    packages=packages,
+    version="0.1.2",
+    packages=find_packages(),
     author="Brandon Kuczenski",
     author_email="bkuczenski@ucsb.edu",
     license="BSD 3-clause",

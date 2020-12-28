@@ -175,6 +175,16 @@ class CompartmentContainer(object):
             self.assertIs(rw.parent, self.cm['resources'])
             self.assertEqual(rw.name, 'Resources, water')
 
+        def test_as_list(self):
+            r_l = ['elementary flows', 'resources', 'water', 'subterranean']
+            e_l = ['elementary flows', 'emissions', 'water', 'subterranean']
+            r = self.cm.add_compartments(r_l)
+            e = self.cm.add_compartments(e_l)
+            self.assertEqual(r.name, 'subterranean')
+            self.assertEqual(e.name, 'emissions, water, subterranean')
+            self.assertListEqual(r.as_list(), r_l)
+            self.assertListEqual(e.as_list(), e_l)
+
 
 class CompartmentTest(CompartmentContainer.CompartmentTest):
     pass

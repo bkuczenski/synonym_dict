@@ -64,7 +64,11 @@ class Compartment(SynonymSet):
         if self.parent is None:
             return [str(self)]
         else:
-            return self.parent.as_list() + [str(self)]
+            pn = self.parent.name + ', '
+            mn = str(self)
+            if mn.startswith(pn):
+                mn = mn[len(pn):]
+            return self.parent.as_list() + [mn]
         #return list(self)
 
     @property
