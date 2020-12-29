@@ -109,6 +109,10 @@ class CompartmentContainer(object):
             with self.assertRaises(NonSpecificCompartment):
                 self.cm.add_compartments(['unspecified', 'unspecified water'])
 
+        def test_retrieve_nonspecific(self):
+            self.assertIs(self.cm['undefined'], self.cm._null_entry)
+            self.assertIs(self.cm[None], self.cm._null_entry)
+
         def test_retrieve_by_tuple(self):
             self._add_water_dict()
             w = self.cm['water']

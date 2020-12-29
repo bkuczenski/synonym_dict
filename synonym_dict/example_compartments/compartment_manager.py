@@ -193,6 +193,9 @@ class CompartmentManager(SynonymDict):
     def __getitem__(self, item):
         if isinstance(item, tuple):
             item = self._tuple_to_name(item)
-        if str(item).lower() in NONSPECIFIC_LOWER:
-            return self._null_entry
-        return super(CompartmentManager, self).__getitem__(item)
+        try:
+            return super(CompartmentManager, self).__getitem__(item)
+        except KeyError:
+            if str(item).lower() in NONSPECIFIC_LOWER:
+                return self._null_entry
+            raise
