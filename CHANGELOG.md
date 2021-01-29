@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.1.4 (2021-01-29)
+
+Add CAS number detection to Flowables.add_synonym().  Previously it had only worked on new_entry.
+
 ### 0.1.3 (2020-12-27)
 
 Don't check every query for NONSPECIFIC_LOWER.

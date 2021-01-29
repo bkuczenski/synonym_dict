@@ -1,15 +1,9 @@
 from setuptools import setup, find_packages
 
-# TODO
-# Change `author`
-# Change `author_email`
-# Change `url`
-# Change the PyPI classifiers: https://pypi.org/pypi?%3Aaction=list_classifiers
-
 
 setup(
     name='synonym_dict',
-    version="0.1.3",
+    version="0.1.4",
     packages=find_packages(),
     author="Brandon Kuczenski",
     author_email="bkuczenski@ucsb.edu",
