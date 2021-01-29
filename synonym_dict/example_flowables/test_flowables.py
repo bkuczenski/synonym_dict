@@ -84,6 +84,12 @@ class FlowablesTest(unittest.TestCase):
     def test_return_type(self):
         self.assertIsInstance(self.f['carbon dioxide'], Flowable)
 
+    def test_add_cas_later(self):
+        c = self.f.new_entry('foofer', 'foofer boogalcide')
+        self.f.add_synonym(c, '6848486')
+        self.assertIn('6848-48-6', set(c.terms))
+        self.assertIs(self.f['006848-48-6'], c)
+
     def test_key_stability_under_rename(self):
         co2 = self.f['co2']
         self.assertEqual(co2.name, 'carbon dioxide')
