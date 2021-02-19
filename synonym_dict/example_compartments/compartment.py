@@ -81,8 +81,16 @@ class Compartment(SynonymSet):
     def parent(self):
         return self._parent
 
+    @property
+    def seq(self):
+        if self.parent is None:
+            return [self]
+        return self.parent.seq + [self]
+
     @parent.setter
     def parent(self, parent):
+        if parent is not None and self in parent.seq:
+            raise InvalidSubCompartment('Compartment cannot be its own ancestor')
         if self._parent is not None:
             self._parent.deregister_subcompartment(self)
         self._parent = parent
