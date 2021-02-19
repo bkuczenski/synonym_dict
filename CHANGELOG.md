@@ -1,11 +1,16 @@
 # Changelog
 
+### 0.1.6 (2021-02-19)
+
+Nonspecific child compartments submitted to `CompartmentManager.__getitem__` can be bypassed. 
+I think we are getting close to 0.2.0 here!
+
 ### 0.1.5 (2021-02-19)
 
 Bug fixes: patch a recursion bomb, leaky subcompartments. 'attach' method for avoiding lineage
 conflicts.
 
-`.post0` - test code changes for ease of subclassing 
+ - `.post0` - test code changes for ease of subclassing
 
 ### 0.1.4 (2021-01-29)
 

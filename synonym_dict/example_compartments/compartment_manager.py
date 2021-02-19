@@ -204,5 +204,7 @@ class CompartmentManager(SynonymDict):
             return super(CompartmentManager, self).__getitem__(item)
         except KeyError:
             if str(item).lower() in NONSPECIFIC_LOWER:
+                if isinstance(item, self._syn_type):
+                    return self.__getitem__(item.parent)
                 return self._null_entry
             raise

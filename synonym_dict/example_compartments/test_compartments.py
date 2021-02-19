@@ -124,6 +124,12 @@ class CompartmentContainer(object):
             self.assertIs(self.cm['undefined'], self.cm._null_entry)
             self.assertIs(self.cm[None], self.cm._null_entry)
 
+        def test_retrieve_nonspecific_typed(self):
+            f0 = self.cm.add_compartments(('forble',))
+            c0 = self.cm._syn_type('forble')
+            c1 = self.cm._syn_type('unspecified', parent=c0)
+            self.assertIs(self.cm[c1], f0)
+
         def test_count_of_items(self):
             self._add_water_dict()
             self.assertEqual(len(self.cm), len(list(self.cm.objects)))
