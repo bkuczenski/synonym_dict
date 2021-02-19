@@ -1,5 +1,5 @@
 from synonym_dict.tests.test_synonym_dict import TestContainer
-from .compartment import Compartment
+from .compartment import Compartment, InvalidSubCompartment
 from .compartment_manager import CompartmentManager, NonSpecificCompartment, InconsistentLineage
 import unittest
 
@@ -16,6 +16,12 @@ class CompartmentContainer(object):
             self.assertListEqual([str(k) for k in c.self_and_subcompartments], ['emissions', 'emissions to air',
                                                                                 'emissions to rural air',
                                                                                 'emissions to urban air'])
+
+        def test_seq(self):
+            c = Compartment('emissions')
+            d = Compartment('emissions to air', parent=c)
+            e = Compartment('emissions to urban air', parent=d)
+            self.assertListEqual(e.seq, [c, d, e])
 
         def test_serialize(self):
             c = Compartment('emissions')
@@ -105,6 +111,11 @@ class CompartmentContainer(object):
             self.assertEqual(c.name, 'water, unspecified')
             self.assertEqual(c.parent.name, 'water')
 
+        def test_parentage(self):
+            c = self.cm.add_compartments(['street', 'address', 'room'])
+            with self.assertRaises(InvalidSubCompartment):
+                c.top().parent = c
+
         def test_top_level_nonspecific(self):
             with self.assertRaises(NonSpecificCompartment):
                 self.cm.add_compartments(['unspecified', 'unspecified water'])
@@ -112,6 +123,29 @@ class CompartmentContainer(object):
         def test_retrieve_nonspecific(self):
             self.assertIs(self.cm['undefined'], self.cm._null_entry)
             self.assertIs(self.cm[None], self.cm._null_entry)
+
+        def test_count_of_items(self):
+            self._add_water_dict()
+            self.assertEqual(len(self.cm), len(list(self.cm.objects)))
+
+        def test_no_lingering_subcompartments(self):
+            self._add_water_dict()
+            self.assertEqual(len(list(self.cm.objects)), 2)
+            p = self.cm['water emissions']
+            k = self.cm.new_entry('zerbet', parent=p)
+            self.assertEqual(len(list(self.cm.objects)), 3)
+            k2 = self.cm.new_entry('zerbet', parent=p)
+            self.assertEqual(len(list(self.cm.objects)), 3)
+            self.assertIs(k, k2)
+
+        def test_skip_nonspecific_spec(self):
+            ew = self.cm.add_compartments(['household items', 'furniture'])
+            dw = self.cm.add_compartments(['furniture', 'unspecified', 'droll'])
+            self.assertEqual(dw.parent.name, 'furniture, unspecified')
+            self.assertIs(dw.parent.parent, ew)
+            fw = self.cm.add_compartments(['furniture', 'unspecified', 'serious'])
+            self.assertIs(dw.parent, fw.parent)
+            self.assertIs(self.cm['unspecified'], self.cm._null_entry)
 
         def test_retrieve_by_tuple(self):
             self._add_water_dict()
@@ -137,6 +171,11 @@ class CompartmentContainer(object):
             self.assertIs(ua, uc.parent)
 
         def test_inconsistent_lineage(self):
+            """
+            The exception here is because 'water' is a synonym to 'emissions from water' which conflicts with
+            'resources'
+            :return:
+            """
             self._add_water_dict()
             with self.assertRaises(InconsistentLineage):
                 self.cm.add_compartments(['resources', 'water'], conflict=None)
@@ -183,7 +222,7 @@ class CompartmentContainer(object):
             r_l = ['elementary flows', 'resources', 'water', 'subterranean']
             e_l = ['elementary flows', 'emissions', 'water', 'subterranean']
             r = self.cm.add_compartments(r_l)
-            e = self.cm.add_compartments(e_l)
+            e = self.cm.add_compartments(e_l, conflict='rename')
             self.assertEqual(r.name, 'subterranean')
             self.assertEqual(e.name, 'emissions, water, subterranean')
             self.assertListEqual(r.as_list(), r_l)

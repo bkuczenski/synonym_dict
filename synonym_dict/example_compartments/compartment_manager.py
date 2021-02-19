@@ -110,6 +110,7 @@ class CompartmentManager(SynonymDict):
                                                                                        ent.top()))
 
         super(CompartmentManager, self)._merge(existing_entry, ent)
+        ent.parent = None
         for sub in list(ent.subcompartments):
             sub.parent = existing_entry
 
@@ -151,12 +152,14 @@ class CompartmentManager(SynonymDict):
             new = self.new_entry(c, parent=current)
             return new
 
-    def add_compartments(self, comps, conflict='rename'):
+    def add_compartments(self, comps, conflict=None):
         """
         comps should be a list of Compartment objects or strings, in descending order
         :param comps:
         :param conflict: ['rename'] strategy to resolve inconsistent lineage problems.
           'rename' changes the name of the conflicting entry to include its native (nonconflicting) parent
+          'attach' sticks the whole encountered (existing) hierarchy onto the incoming hierarchy at current- could
+            result in major structural changes to the hierarchy
           'match' hunts among the subcompartments of parent for a regex find
           'skip' simply drops the conflicting entry
           None or else: raise InconsistentLineage
@@ -178,6 +181,10 @@ class CompartmentManager(SynonymDict):
                         new = next(s for s in current.subcompartments if s.contains_string(c, ignore_case=True))
                     except StopIteration:
                         raise e
+                elif conflict == 'attach':
+                    new = self.get(c)
+                    new.top().parent = current
+
                 elif conflict == 'skip':
                     new = current
                 elif conflict == 'rename':
