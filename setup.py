@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='synonym_dict',
-    version="0.1.4",
+    version="0.1.5.post0",
     packages=find_packages(),
     author="Brandon Kuczenski",
     author_email="bkuczenski@ucsb.edu",

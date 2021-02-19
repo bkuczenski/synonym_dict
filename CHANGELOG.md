@@ -1,5 +1,12 @@
 # Changelog
 
+### 0.1.5 (2021-02-19)
+
+Bug fixes: patch a recursion bomb, leaky subcompartments. 'attach' method for avoiding lineage
+conflicts.
+
+`.post0` - test code changes for ease of subclassing 
+
 ### 0.1.4 (2021-01-29)
 
 Add CAS number detection to Flowables.add_synonym().  Previously it had only worked on new_entry.

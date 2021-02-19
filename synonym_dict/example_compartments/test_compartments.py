@@ -128,14 +128,16 @@ class CompartmentContainer(object):
             self._add_water_dict()
             self.assertEqual(len(self.cm), len(list(self.cm.objects)))
 
+        _water_dict_objects = 2
+
         def test_no_lingering_subcompartments(self):
             self._add_water_dict()
-            self.assertEqual(len(list(self.cm.objects)), 2)
+            self.assertEqual(len(list(self.cm.objects)), self._water_dict_objects)
             p = self.cm['water emissions']
             k = self.cm.new_entry('zerbet', parent=p)
-            self.assertEqual(len(list(self.cm.objects)), 3)
+            self.assertEqual(len(list(self.cm.objects)), self._water_dict_objects + 1)
             k2 = self.cm.new_entry('zerbet', parent=p)
-            self.assertEqual(len(list(self.cm.objects)), 3)
+            self.assertEqual(len(list(self.cm.objects)), self._water_dict_objects + 1)
             self.assertIs(k, k2)
 
         def test_skip_nonspecific_spec(self):
