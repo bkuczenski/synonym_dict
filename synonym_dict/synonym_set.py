@@ -185,7 +185,13 @@ class SynonymSet(object):
         return hash(self._id)
 
     def __contains__(self, item):
-        return item in self.terms
+        if item in self._terms:
+            return True
+        else:
+            for c in self._children:
+                if c.__contains__(item):
+                    return True
+            return False
 
     def __eq__(self, other):
         if hasattr(other, 'terms'):
