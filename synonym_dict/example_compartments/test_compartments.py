@@ -129,6 +129,8 @@ class CompartmentContainer(object):
             c0 = self.cm._syn_type('forble')
             c1 = self.cm._syn_type('unspecified', parent=c0)
             self.assertIs(self.cm[c1], f0)
+            f1 = self.cm.new_entry('unspecified', parent=f0)
+            self.assertIs(self.cm[c1], f1)
 
         def test_count_of_items(self):
             self._add_water_dict()
@@ -159,6 +161,25 @@ class CompartmentContainer(object):
             self._add_water_dict()
             w = self.cm['water']
             self.assertIs(w, self.cm[('emissions', 'water emissions')])
+
+        def test_retrieve_tuple_by_synonym(self):
+            res = self.cm.new_entry('Resources')
+            ing = self.cm.new_entry('from ground', 'in ground', parent=res)
+            self.assertIs(self.cm['in ground'].name, 'from ground')
+            self.assertIs(self.cm['Resources', 'in ground'], ing)
+
+        def test_cross_lineage(self):
+            self.cm.add_compartments(['emissions', 'to water', 'freshwater'])
+            self.cm.add_compartments(['emissions', 'to air', 'indoor'])
+            with self.assertRaises(InconsistentLineage):
+                self.cm.__getitem__(('emissions', 'to air', 'freshwater'))
+
+        def test_retrieve_tuple_unspecified(self):
+            a = self.cm['to air']
+            self.assertIs(a, self.cm['to air', 'unspecified'])
+            b = self.cm.add_compartments(('Emissions', 'to air', 'unspecified'))
+            self.assertIs(b, a)
+            self.assertIs(a, self.cm['to air, unspecified'])
 
         '''
         Potential Glitch cases:

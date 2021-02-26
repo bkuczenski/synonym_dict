@@ -197,14 +197,28 @@ class CompartmentManager(SynonymDict):
         self.add_synonym(current.name, auto_name)
         return current
 
+    def _is_known_compartment(self, item):
+        e = None
+        for i in item:
+            if str(i).lower() in NONSPECIFIC_LOWER:
+                continue
+            g = self.__getitem__(i)
+            if e and not g.is_subcompartment(e):
+                raise InconsistentLineage
+            e = g
+        return e
+
     def __getitem__(self, item):
         if isinstance(item, tuple):
-            item = self._tuple_to_name(item)
+            try:
+                return self._is_known_compartment(item)
+            except (KeyError, InconsistentLineage):
+                item = self._tuple_to_name(item)
         try:
             return super(CompartmentManager, self).__getitem__(item)
         except KeyError:
             if str(item).lower() in NONSPECIFIC_LOWER:
                 if isinstance(item, self._syn_type):
                     return self.__getitem__(item.parent)
-                return self._null_entry
+                raise NonSpecificCompartment(item)
             raise
