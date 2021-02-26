@@ -83,16 +83,25 @@ class CompartmentManager(SynonymDict):
         :param kwargs:
         :return:
         """
-        if parent is not None:
-            if not isinstance(parent, Compartment):
-                parent = self._d[parent]
-            pn = parent.name
-            args = tuple([', '.join([pn, k]) if k.lower() in NONSPECIFIC_LOWER else k for k in args])
+        nonspec = tuple([k for k in args if k.lower() in NONSPECIFIC_LOWER])
+        args = tuple([k for k in args if k.lower() not in NONSPECIFIC_LOWER])
+        if len(args) == 0:
+            # no specific content
+            if parent is None:
+                raise NonSpecificCompartment(nonspec)
+            else:
+                out = parent
+                pn = parent.name
+                # add nonspec synonyms to parent
         else:
-            for k in args:
-                if str(k).lower() in NONSPECIFIC_LOWER:
-                    raise NonSpecificCompartment(k)
-        return super(CompartmentManager, self).new_entry(*args, parent=parent, **kwargs)
+            out = super(CompartmentManager, self).new_entry(*args, parent=parent, **kwargs)
+            if parent is None:
+                pn = out.name
+            else:
+                pn = parent.name
+        for k in nonspec:
+            self.add_synonym(out.name, ', '.join([pn, k]))  # this is crucial-- 
+        return out
 
     def _merge(self, existing_entry, ent):
         """
@@ -209,10 +218,10 @@ class CompartmentManager(SynonymDict):
         return e
 
     def __getitem__(self, item):
-        if isinstance(item, tuple):
+        if isinstance(item, tuple) or isinstance(item, list):
             try:
                 return self._is_known_compartment(item)
-            except (KeyError, InconsistentLineage):
+            except KeyError:
                 item = self._tuple_to_name(item)
         try:
             return super(CompartmentManager, self).__getitem__(item)
