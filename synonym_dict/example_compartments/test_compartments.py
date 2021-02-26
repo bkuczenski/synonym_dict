@@ -160,6 +160,12 @@ class CompartmentContainer(object):
             w = self.cm['water']
             self.assertIs(w, self.cm[('emissions', 'water emissions')])
 
+        def test_retrieve_tuple_by_synonym(self):
+            res = self.cm.new_entry('Resources')
+            ing = self.cm.new_entry('from ground', 'in ground', parent=res)
+            self.assertIs(self.cm['in ground'].name, 'from ground')
+            self.assertIs(self.cm['Resources', 'in ground'], ing)
+
         '''
         Potential Glitch cases:
          * relative add
