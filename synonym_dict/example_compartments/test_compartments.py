@@ -179,6 +179,23 @@ class CompartmentContainer(object):
             with self.assertRaises(InconsistentLineage):
                 self.cm.__getitem__(('emissions', 'to air', 'freshwater'))
 
+        def test_distinct_lineage(self):
+            fc = self.cm.add_compartments(['fuels', 'coal', 'bituminous'])
+            with self.assertRaises(InconsistentLineage):
+                self.cm.add_compartments(['heat', 'coal', 'pulverized'])
+            hc = self.cm.add_compartments(['heat', 'coal', 'pulverized'], conflict='rename')
+            self.assertIs(fc.parent, self.cm['fuels', 'coal'])
+            self.assertIs(hc.parent, self.cm['heat', 'coal'])
+            self.assertIs(fc, self.cm['coal', 'bituminous'])
+            with self.assertRaises(InconsistentLineage):
+                ''' # this doesn't work because the user's specification is ambiguous in conflicting ways. 
+                There is no way for the manager to know that 'coal' is an acceptable way to refer to 'heat, coal'
+                because at the time 'heat', 'coal' was disclosed to it, 'coal' already had a meaning. user authorized
+                rename and must use the context returned by the manager.
+                if the user had just specified 'pulverized' the request would not be ambiguous
+                '''
+                self.assertIs(hc, self.cm['coal', 'pulverized'])
+
         def test_retrieve_tuple_unspecified(self):
             o = self.cm.new_entry('to air')
             a = self.cm['to air']

@@ -89,21 +89,19 @@ class CompartmentManager(SynonymDict):
         nonspec = tuple([k for k in args if k.lower() in NONSPECIFIC_LOWER])
         args = tuple([k for k in args if k.lower() not in NONSPECIFIC_LOWER])
         if len(args) == 0:
-            # no specific content
             if parent is None:
                 raise NonSpecificCompartment(nonspec)
-            else:
-                out = parent
-                pn = parent.name
-                # add nonspec synonyms to parent
+            # no specific content
+            out = pn = parent
+
         else:
             out = super(CompartmentManager, self).new_entry(*args, parent=parent, **kwargs)
             if parent is None:
-                pn = out.name
+                pn = out
             else:
-                pn = parent.name
+                pn = parent
         for k in nonspec:
-            self.add_synonym(out.name, ', '.join([pn, k]))  # this is crucial-- 
+            self.add_synonym(out.name, self._fuller_name(k, pn))  # this is crucial--
         return out
 
     def _merge(self, existing_entry, ent):
@@ -125,6 +123,19 @@ class CompartmentManager(SynonymDict):
         ent.parent = None
         for sub in list(ent.subcompartments):
             sub.parent = existing_entry
+
+    @staticmethod
+    def _fuller_name(name, parent):
+        """
+        more-precise name, given the parent
+        used when renaming a compartment due to a collision
+        :param name:
+        :param parent:
+        :return:
+        """
+        if parent is None:
+            raise NonSpecificCompartment(name)
+        return ', '.join([parent.name, name])
 
     @staticmethod
     def _tuple_to_name(comps):
@@ -216,7 +227,10 @@ class CompartmentManager(SynonymDict):
                 continue
             g = self.__getitem__(i)
             if e and not g.is_subcompartment(e):
-                raise InconsistentLineage
+                try:
+                    g = self.__getitem__(self._fuller_name(i, e))
+                except KeyError:
+                    raise InconsistentLineage(item, i, g)
             e = g
         return e
 
