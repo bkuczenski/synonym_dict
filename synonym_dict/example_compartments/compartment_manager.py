@@ -218,15 +218,17 @@ class CompartmentManager(SynonymDict):
         return e
 
     def __getitem__(self, item):
-        if isinstance(item, tuple) or isinstance(item, list):
-            try:
-                return self._is_known_compartment(item)
-            except KeyError:
-                item = self._tuple_to_name(item)
         try:
             return super(CompartmentManager, self).__getitem__(item)
         except KeyError:
-            if str(item).lower() in NONSPECIFIC_LOWER:
+            if isinstance(item, tuple):
+                try:
+                    match = self._is_known_compartment(item)
+                    self.add_synonym(match, item)
+                    return match
+                except (KeyError, InconsistentLineage):
+                    return self.__getitem__(self._tuple_to_name(item))
+            elif str(item).lower() in NONSPECIFIC_LOWER:
                 if isinstance(item, self._syn_type):
                     return self.__getitem__(item.parent)
                 raise NonSpecificCompartment(item)

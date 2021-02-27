@@ -5,6 +5,8 @@
 Nonspecific child compartments submitted to `CompartmentManager.__getitem__` can be bypassed. 
 I think we are getting close to 0.2.0 here!
 
+ - `post0` (2021-02-24) Major performance improvement on `SynonymSet.__contains__`
+
 ### 0.1.5 (2021-02-19)
 
 Bug fixes: patch a recursion bomb, leaky subcompartments. 'attach' method for avoiding lineage
