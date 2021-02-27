@@ -94,9 +94,11 @@ class CompartmentContainer(object):
             cx = self.cm['resources']
             self.assertIs(self.cm[cx], cx, ca)
 
+        '''
         def test_null(self):
             cx = self.cm[None]
             self.assertIs(cx, self.cm._null_entry)
+        '''
 
         def test_add_null(self):
             cx = self.cm.add_compartments(())
@@ -108,8 +110,8 @@ class CompartmentContainer(object):
 
         def test_unspecified(self):
             c = self.cm.add_compartments(['emissions', 'water', 'unspecified'])
-            self.assertEqual(c.name, 'water, unspecified')
-            self.assertEqual(c.parent.name, 'water')
+            self.assertEqual(c.name, 'water')
+            self.assertEqual(self.cm['water, unspecified'].name, 'water')
 
         def test_parentage(self):
             c = self.cm.add_compartments(['street', 'address', 'room'])
@@ -121,8 +123,10 @@ class CompartmentContainer(object):
                 self.cm.add_compartments(['unspecified', 'unspecified water'])
 
         def test_retrieve_nonspecific(self):
-            self.assertIs(self.cm['undefined'], self.cm._null_entry)
-            self.assertIs(self.cm[None], self.cm._null_entry)
+            with self.assertRaises(NonSpecificCompartment):
+                self.cm.__getitem__('undefined')
+            with self.assertRaises(NonSpecificCompartment):
+                self.cm.__getitem__(None)
 
         def test_retrieve_nonspecific_typed(self):
             f0 = self.cm.add_compartments(('forble',))
@@ -151,11 +155,12 @@ class CompartmentContainer(object):
         def test_skip_nonspecific_spec(self):
             ew = self.cm.add_compartments(['household items', 'furniture'])
             dw = self.cm.add_compartments(['furniture', 'unspecified', 'droll'])
-            self.assertEqual(dw.parent.name, 'furniture, unspecified')
-            self.assertIs(dw.parent.parent, ew)
+            self.assertIs(dw.parent, ew)
             fw = self.cm.add_compartments(['furniture', 'unspecified', 'serious'])
             self.assertIs(dw.parent, fw.parent)
-            self.assertIs(self.cm['unspecified'], self.cm._null_entry)
+            self.assertIs(self.cm['furniture, unspecified'], ew)
+            with self.assertRaises(NonSpecificCompartment):
+                self.cm.__getitem__('unspecified')
 
         def test_retrieve_by_tuple(self):
             self._add_water_dict()
@@ -175,7 +180,9 @@ class CompartmentContainer(object):
                 self.cm.__getitem__(('emissions', 'to air', 'freshwater'))
 
         def test_retrieve_tuple_unspecified(self):
+            o = self.cm.new_entry('to air')
             a = self.cm['to air']
+            self.assertIs(o, a)
             self.assertIs(a, self.cm['to air', 'unspecified'])
             b = self.cm.add_compartments(('Emissions', 'to air', 'unspecified'))
             self.assertIs(b, a)

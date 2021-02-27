@@ -83,6 +83,9 @@ class CompartmentManager(SynonymDict):
         :param kwargs:
         :return:
         """
+        if parent is not None:
+            if not isinstance(parent, self._syn_type):
+                parent = self._d[parent]
         nonspec = tuple([k for k in args if k.lower() in NONSPECIFIC_LOWER])
         args = tuple([k for k in args if k.lower() not in NONSPECIFIC_LOWER])
         if len(args) == 0:
@@ -226,7 +229,7 @@ class CompartmentManager(SynonymDict):
                     match = self._is_known_compartment(item)
                     self.add_synonym(match, item)
                     return match
-                except (KeyError, InconsistentLineage):
+                except KeyError:
                     return self.__getitem__(self._tuple_to_name(item))
             elif str(item).lower() in NONSPECIFIC_LOWER:
                 if isinstance(item, self._syn_type):
