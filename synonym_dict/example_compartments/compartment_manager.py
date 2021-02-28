@@ -192,9 +192,11 @@ class CompartmentManager(SynonymDict):
         if len(comps) == 0 or comps is None:
             return self._null_entry
         current = None
-        auto_name = self._tuple_to_name(comps)
-        if auto_name in self._d:
+        auto_name = tuple(comps)
+        try:
             return self[auto_name]
+        except (KeyError, InconsistentLineage):  # either of these can show up if auto_name is not known
+            pass
         for c in comps:
             try:
                 new = self._check_subcompartment_lineage(current, c)
@@ -239,12 +241,9 @@ class CompartmentManager(SynonymDict):
             return super(CompartmentManager, self).__getitem__(item)
         except KeyError:
             if isinstance(item, tuple):
-                try:
-                    match = self._is_known_compartment(item)
-                    self.add_synonym(match, item)
-                    return match
-                except KeyError:
-                    return self.__getitem__(self._tuple_to_name(item))
+                match = self._is_known_compartment(item)  # or else KeyError
+                self.add_synonym(match, item)
+                return match
             elif str(item).lower() in NONSPECIFIC_LOWER:
                 if isinstance(item, self._syn_type):
                     return self.__getitem__(item.parent)
