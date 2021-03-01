@@ -48,16 +48,14 @@ class LowerDict(dict):
             self[key] = val
 
     def __contains__(self, key):
-        key = self.Key(key)
-        return super(LowerDict, self).__contains__(key)
+        return super(LowerDict, self).__contains__(str(key).strip().lower())
 
     def __setitem__(self, key, value):
         key = self.Key(key)
         super(LowerDict, self).__setitem__(key, value)
 
     def __getitem__(self, key):
-        key = self.Key(key)
-        return super(LowerDict, self).__getitem__(key)
+        return super(LowerDict, self).__getitem__(str(key).strip().lower())
 
     def keys(self):
         return LowerDictKeys(super(LowerDict, self).keys())
@@ -73,8 +71,7 @@ class LowerDict(dict):
             return default
 
     def pop(self, key, default=None):
-        key = self.Key(key)
-        return super(LowerDict, self).pop(key, default)
+        return super(LowerDict, self).pop(str(key).strip().lower(), default)
 
     def update(self, m, **kwargs):
         for k, v in m.items():
