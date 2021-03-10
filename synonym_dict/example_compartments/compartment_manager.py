@@ -84,15 +84,25 @@ class CompartmentManager(SynonymDict):
         :return:
         """
         if parent is not None:
-            if not isinstance(parent, Compartment):
+            if not isinstance(parent, self._syn_type):
                 parent = self._d[parent]
-            pn = parent.name
-            args = tuple([', '.join([pn, k]) if k.lower() in NONSPECIFIC_LOWER else k for k in args])
+        nonspec = tuple([k for k in args if k.lower() in NONSPECIFIC_LOWER])
+        args = tuple([k for k in args if k.lower() not in NONSPECIFIC_LOWER])
+        if len(args) == 0:
+            if parent is None:
+                raise NonSpecificCompartment(nonspec)
+            # no specific content
+            out = pn = parent
+
         else:
-            for k in args:
-                if str(k).lower() in NONSPECIFIC_LOWER:
-                    raise NonSpecificCompartment(k)
-        return super(CompartmentManager, self).new_entry(*args, parent=parent, **kwargs)
+            out = super(CompartmentManager, self).new_entry(*args, parent=parent, **kwargs)
+            if parent is None:
+                pn = out
+            else:
+                pn = parent
+        for k in nonspec:
+            self.add_synonym(out.name, self._fuller_name(k, pn))  # this is crucial--
+        return out
 
     def _merge(self, existing_entry, ent):
         """
@@ -113,6 +123,19 @@ class CompartmentManager(SynonymDict):
         ent.parent = None
         for sub in list(ent.subcompartments):
             sub.parent = existing_entry
+
+    @staticmethod
+    def _fuller_name(name, parent):
+        """
+        more-precise name, given the parent
+        used when renaming a compartment due to a collision
+        :param name:
+        :param parent:
+        :return:
+        """
+        if parent is None:
+            raise NonSpecificCompartment(name)
+        return ', '.join([parent.name, name])
 
     @staticmethod
     def _tuple_to_name(comps):
@@ -169,9 +192,11 @@ class CompartmentManager(SynonymDict):
         if len(comps) == 0 or comps is None:
             return self._null_entry
         current = None
-        auto_name = self._tuple_to_name(comps)
-        if auto_name in self._d:
+        auto_name = tuple(comps)
+        try:
             return self[auto_name]
+        except (KeyError, InconsistentLineage):  # either of these can show up if auto_name is not known
+            pass
         for c in comps:
             try:
                 new = self._check_subcompartment_lineage(current, c)
@@ -204,7 +229,10 @@ class CompartmentManager(SynonymDict):
                 continue
             g = self.__getitem__(i)
             if e and not g.is_subcompartment(e):
-                raise InconsistentLineage
+                try:
+                    g = self.__getitem__(self._fuller_name(i, e))
+                except KeyError:
+                    raise InconsistentLineage(item, i, g)
             e = g
         return e
 
@@ -213,14 +241,11 @@ class CompartmentManager(SynonymDict):
             return super(CompartmentManager, self).__getitem__(item)
         except KeyError:
             if isinstance(item, tuple):
-                try:
-                    match = self._is_known_compartment(item)
-                    self.add_synonym(match, item)
-                    return match
-                except (KeyError, InconsistentLineage):
-                    return self.__getitem__(self._tuple_to_name(item))
+                match = self._is_known_compartment(item)  # or else KeyError
+                self.add_synonym(match, item)
+                return match
             elif str(item).lower() in NONSPECIFIC_LOWER:
                 if isinstance(item, self._syn_type):
                     return self.__getitem__(item.parent)
-                return self._null_entry
+                raise NonSpecificCompartment(item)
             raise

@@ -94,9 +94,11 @@ class CompartmentContainer(object):
             cx = self.cm['resources']
             self.assertIs(self.cm[cx], cx, ca)
 
+        '''
         def test_null(self):
             cx = self.cm[None]
             self.assertIs(cx, self.cm._null_entry)
+        '''
 
         def test_add_null(self):
             cx = self.cm.add_compartments(())
@@ -108,8 +110,8 @@ class CompartmentContainer(object):
 
         def test_unspecified(self):
             c = self.cm.add_compartments(['emissions', 'water', 'unspecified'])
-            self.assertEqual(c.name, 'water, unspecified')
-            self.assertEqual(c.parent.name, 'water')
+            self.assertEqual(c.name, 'water')
+            self.assertEqual(self.cm['water, unspecified'].name, 'water')
 
         def test_parentage(self):
             c = self.cm.add_compartments(['street', 'address', 'room'])
@@ -121,14 +123,18 @@ class CompartmentContainer(object):
                 self.cm.add_compartments(['unspecified', 'unspecified water'])
 
         def test_retrieve_nonspecific(self):
-            self.assertIs(self.cm['undefined'], self.cm._null_entry)
-            self.assertIs(self.cm[None], self.cm._null_entry)
+            with self.assertRaises(NonSpecificCompartment):
+                self.cm.__getitem__('undefined')
+            with self.assertRaises(NonSpecificCompartment):
+                self.cm.__getitem__(None)
 
         def test_retrieve_nonspecific_typed(self):
             f0 = self.cm.add_compartments(('forble',))
             c0 = self.cm._syn_type('forble')
             c1 = self.cm._syn_type('unspecified', parent=c0)
             self.assertIs(self.cm[c1], f0)
+            f1 = self.cm.new_entry('unspecified', parent=f0)
+            self.assertIs(self.cm[c1], f1)
 
         def test_count_of_items(self):
             self._add_water_dict()
@@ -149,11 +155,12 @@ class CompartmentContainer(object):
         def test_skip_nonspecific_spec(self):
             ew = self.cm.add_compartments(['household items', 'furniture'])
             dw = self.cm.add_compartments(['furniture', 'unspecified', 'droll'])
-            self.assertEqual(dw.parent.name, 'furniture, unspecified')
-            self.assertIs(dw.parent.parent, ew)
+            self.assertIs(dw.parent, ew)
             fw = self.cm.add_compartments(['furniture', 'unspecified', 'serious'])
             self.assertIs(dw.parent, fw.parent)
-            self.assertIs(self.cm['unspecified'], self.cm._null_entry)
+            self.assertIs(self.cm['furniture, unspecified'], ew)
+            with self.assertRaises(NonSpecificCompartment):
+                self.cm.__getitem__('unspecified')
 
         def test_retrieve_by_tuple(self):
             self._add_water_dict()
@@ -165,6 +172,38 @@ class CompartmentContainer(object):
             ing = self.cm.new_entry('from ground', 'in ground', parent=res)
             self.assertIs(self.cm['in ground'].name, 'from ground')
             self.assertIs(self.cm['Resources', 'in ground'], ing)
+
+        def test_cross_lineage(self):
+            self.cm.add_compartments(['emissions', 'to water', 'freshwater'])
+            self.cm.add_compartments(['emissions', 'to air', 'indoor'])
+            with self.assertRaises(InconsistentLineage):
+                self.cm.__getitem__(('emissions', 'to air', 'freshwater'))
+
+        def test_distinct_lineage(self):
+            fc = self.cm.add_compartments(['fuels', 'coal', 'bituminous'])
+            with self.assertRaises(InconsistentLineage):
+                self.cm.add_compartments(['heat', 'coal', 'pulverized'])
+            hc = self.cm.add_compartments(['heat', 'coal', 'pulverized'], conflict='rename')
+            self.assertIs(fc.parent, self.cm['fuels', 'coal'])
+            self.assertIs(hc.parent, self.cm['heat', 'coal'])
+            self.assertIs(fc, self.cm['coal', 'bituminous'])
+            with self.assertRaises(InconsistentLineage):
+                ''' # this doesn't work because the user's specification is ambiguous in conflicting ways. 
+                There is no way for the manager to know that 'coal' is an acceptable way to refer to 'heat, coal'
+                because at the time 'heat', 'coal' was disclosed to it, 'coal' already had a meaning. user authorized
+                rename and must use the context returned by the manager.
+                if the user had just specified 'pulverized' the request would not be ambiguous
+                '''
+                self.assertIs(hc, self.cm['coal', 'pulverized'])
+
+        def test_retrieve_tuple_unspecified(self):
+            o = self.cm.new_entry('to air')
+            a = self.cm['to air']
+            self.assertIs(o, a)
+            self.assertIs(a, self.cm['to air', 'unspecified'])
+            b = self.cm.add_compartments(('Emissions', 'to air', 'unspecified'))
+            self.assertIs(b, a)
+            self.assertIs(a, self.cm['to air, unspecified'])
 
         '''
         Potential Glitch cases:
