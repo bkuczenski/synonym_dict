@@ -1,5 +1,13 @@
 # Changelog
 
+### 0.2.0 (2021-03-09)
+
+Wrap-up release that encapsulates improvements with "non-specific" compartments and performance improvements.
+ * Anything named "xxx, unspecified" is no longer considered distinct from the thing named "xxx" (close #4)
+ * Tuples are now acknowledged as the "proper" way to reference a compartment
+ * Major performance improvement when testing SynonymSet membership (0.1.6.post0)
+ * Upgrade "example" cases to full-blown subclasses and improve exports
+
 ### 0.1.6 (2021-02-19)
 
 Nonspecific child compartments submitted to `CompartmentManager.__getitem__` can be bypassed. 
