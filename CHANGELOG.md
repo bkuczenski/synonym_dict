@@ -1,6 +1,10 @@
 # Changelog
 
-### 0.2.0 (2021-03-09)
+### 0.2.1 (2021-03-17)
+
+Fix error with improper adding of query terms to reverse-lookup dictionary (issue #6).
+
+## 0.2.0 (2021-03-09)
 
 Wrap-up release that encapsulates improvements with "non-specific" compartments and performance improvements.
  * Anything named "xxx, unspecified" is no longer considered distinct from the thing named "xxx" (close #4)

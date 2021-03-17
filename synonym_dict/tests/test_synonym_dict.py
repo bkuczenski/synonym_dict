@@ -191,6 +191,18 @@ class TestContainer(object):
             self.assertEqual(type(o1.object), type(o2))
             self.assertEqual(type(o2), type(o3))
 
+        def test_synonyms_nilpotent(self):
+            """
+            Testing for synonyms should not alter the synonym dict
+            :return:
+            """
+            g = self._test_class()
+            h = SynonymSet('a term', 'another term')
+            self.assertFalse(h in g._l)
+            self.assertEqual(list(g.synonyms(h)), [])
+            self.assertFalse(h in g._l)
+
+
 class SynonymDictTest(TestContainer.SynonymDictTest):
     pass
 

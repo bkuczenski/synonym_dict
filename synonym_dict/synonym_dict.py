@@ -268,9 +268,11 @@ class SynonymDict(object):
         :param ent:
         :return:
         """
+        if ent not in self._l:
+            raise KeyError(ent)
         remove_terms = [t for t in self._l[ent].keys()]
         for t in remove_terms:
-            self._remove_term(t)
+            self._remove_term(t, remove_from_entry=False)
 
     def merge(self, first, second, child=False):
         """
@@ -345,7 +347,10 @@ class SynonymDict(object):
 
     def synonyms(self, term):
         if isinstance(term, SynonymSet):
-            ent = term
+            if term in self._l:
+                ent = term
+            else:
+                return
         else:
             ent = self._d[term]
         for t in sorted(self._l[ent].values()):
