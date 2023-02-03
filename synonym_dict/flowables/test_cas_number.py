@@ -19,6 +19,13 @@ class CasNumberTest(unittest.TestCase):
         with self.assertRaises(InvalidCasNumber):
             CasNumber('37205.543.1')
 
+    def test_nonstandard_cas(self):
+        nonstandard = '0091-20-2'
+        other_nonstandard = '091-20-2'
+        c = CasNumber(nonstandard)
+        self.assertIn(nonstandard, list(c.terms))
+        self.assertNotIn(other_nonstandard, list(c.terms))
+
     def test_add_remove(self):
         c = CasNumber(12345)
         with self.assertRaises(NotSupported):
@@ -34,7 +41,7 @@ class CasNumberTest(unittest.TestCase):
 
     def test_pad_input(self):
         g = CasNumber('00124+38+9')
-        self.assertSetEqual(set([k for k in g.terms]), co2_set)
+        self.assertSetEqual(set(g.terms), co2_set | {'00124+38+9'})  # nonstandard entry is recognized
 
     def test_tuple_input(self):
         g = CasNumber(('32768', '4', 1))

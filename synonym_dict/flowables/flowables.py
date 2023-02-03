@@ -3,7 +3,7 @@ A JSON-serializable collection of Flowable objects
 """
 
 from .flowable import Flowable
-from ..synonym_dict import SynonymDict
+from ..synonym_dict import SynonymDict, TermExists
 from .cas_number import cas_regex, CasNumber
 
 

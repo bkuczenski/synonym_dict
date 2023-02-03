@@ -5,7 +5,7 @@ class InvalidSubCompartment(Exception):
     pass
 
 
-class NullContext(Exception):
+class NullContextException(Exception):
     pass
 
 
@@ -28,12 +28,12 @@ class Compartment(SynonymSet):
 
     def add_term(self, term):
         if self.is_null:
-            raise NullContext
+            raise NullContextException
         return super(Compartment, self).add_term(term)
 
     def add_child(self, other, force=False):
         if self.is_null:
-            raise NullContext
+            raise NullContextException
         return super(Compartment, self).add_child(other, force=force)
 
     def __init__(self, *args, parent=None):
@@ -116,7 +116,7 @@ class Compartment(SynonymSet):
 
     def register_subcompartment(self, sub):
         if self.is_null:
-            raise NullContext
+            raise NullContextException
         if sub.parent is not self:
             raise InvalidSubCompartment('Parent %s: relationship does not exist: %s' % (self, sub))
         self._subcompartments.add(sub)

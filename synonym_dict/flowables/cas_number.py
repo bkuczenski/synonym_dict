@@ -69,6 +69,7 @@ class CasNumber(SynonymSet):
         hyphens.  e.g. above input would yield {'124-38-9', '124389', '000124-38-9', '000124389'}
         :param cas:
         """
+        add_str = None
         if len(args) == 1:
             cas = args[0]
         else:
@@ -78,10 +79,13 @@ class CasNumber(SynonymSet):
             _tup = _validate_tuple_input(cas)
         else:
             _tup = _validate_string_input(str(cas))
+            add_str = str(cas)
 
         self._init = True
 
         super(CasNumber, self).__init__(*_generate_cas_formats(_tup))
+        if add_str:
+            self.add_term(add_str)
         self._init = False
 
     def add_term(self, term):

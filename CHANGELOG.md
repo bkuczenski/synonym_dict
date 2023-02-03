@@ -1,5 +1,13 @@
 # Changelog
 
+### 0.2.2 (2023-02-02)
+
+Change approach to dealing with nonstandard CAS numbers.  On an input of '0034-56-7', the non-standard
+entry (which still matches the regexp) should be accepted as a synonym, though other possible 
+defective entries are not.  Inspired by defects observed in ecoinvent 'Naphtalene' _(sic)_.
+
+Also renamed `compartments.compartment.NullContext` (exception) to `NullContextException`. 
+
 ### 0.2.1 (2021-03-17)
 
 Fix error with improper adding of query terms to reverse-lookup dictionary (issue #6).

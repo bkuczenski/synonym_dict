@@ -77,6 +77,12 @@ class FlowablesTest(unittest.TestCase):
     def test_cas_equivalence(self):
         self.assertEqual(self.f[124389], 'carbon dioxide')
 
+    def test_nonstandard_cas(self):
+        ent = self.f.new_entry('unobtanium', '00034-56-7')  # wrong number of digits
+        self.assertIs(self.f['34-56-7'], ent)
+        self.assertIs(self.f['00034-56-7'], ent)  # authentic nonstandard entry is recognized
+        self.assertIs(self.f.get('0034-56-7'), None)  # different nonstandard entry is not
+
     def test_add_set(self):
         self.f.new_entry('methane, biogenic', 'ch4', '74-82-8')
         self.assertEqual(self.f.get('000074-82-8'), 'methane')
