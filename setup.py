@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='synonym_dict',
-    version="0.2.2",
+    version="0.2.3",
     packages=find_packages(),
     author="Brandon Kuczenski",
     author_email="bkuczenski@ucsb.edu",
@@ -14,6 +14,7 @@ setup(
     long_description=open('README.md').read(),
     description='A class that allows retrieval of a given object by any of its synonyms',
     classifiers=[
+        'Development Status :: 4 - Beta',
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',

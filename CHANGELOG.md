@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.2.3 (2023-02-03)
+
+Added a new testcase for merging nonstandard CAS. Removed some verbose output from `CompartmentManager`
+
 ### 0.2.2 (2023-02-02)
 
 Change approach to dealing with nonstandard CAS numbers.  On an input of '0034-56-7', the non-standard

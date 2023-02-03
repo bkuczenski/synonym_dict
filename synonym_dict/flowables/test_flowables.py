@@ -83,6 +83,12 @@ class FlowablesTest(unittest.TestCase):
         self.assertIs(self.f['00034-56-7'], ent)  # authentic nonstandard entry is recognized
         self.assertIs(self.f.get('0034-56-7'), None)  # different nonstandard entry is not
 
+    def test_margninal_nonstandard_cas(self):
+        ent = self.f.new_entry('unobtanium', '34-56-7')
+        self.assertIs(self.f['34567'], ent)
+        k = self.f.new_entry('Unobtennium', '034+56+7')
+        self.assertIs(ent, k)
+
     def test_add_set(self):
         self.f.new_entry('methane, biogenic', 'ch4', '74-82-8')
         self.assertEqual(self.f.get('000074-82-8'), 'methane')

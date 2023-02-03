@@ -30,6 +30,15 @@ class FlowablesDict(SynonymDict):
             for c in cas.terms:
                 self._add_term(c, ent)
             ent.add_child(cas)
+            """ # this turns out to be not needed because the nonstandard CAS gets caught and merged in entity creation
+            try:
+                for c in cas.terms:
+                    self._add_term(c, ent)
+                ent.add_child(cas)
+            except TermExists:  # probably a nonstandard CAS expression that conflicts with an already-existing CAS
+                self._add_term(syn, ent)
+                super(Flowable, ent).add_term(syn)  # dodge CAS number check
+            """
         else:
             self._add_term(syn, ent)  # checks TermExists
             ent.add_term(syn)
