@@ -81,6 +81,7 @@ class SynonymDict(object):
         Create a synonym dictionary that stores entries of a certain type.
         :param ignore_case: [False] whether the synonyms should be considered case-sensitive. This setting also causes
          the dict to ignore leading and trailing whitespace (calls strip().lower())
+         a case-ignoring subclass cannot be forced to observe case with this argument.
 
         The entry class must support the following API:
           constructor:
@@ -98,9 +99,9 @@ class SynonymDict(object):
         if entry_group is not None:
             self.entry_group = str(entry_group)
 
-        ignore_case = ignore_case or self._ignore_case
+        self._ignore_case = ignore_case or self._ignore_case
 
-        if ignore_case:
+        if self._ignore_case:
             self._d = LowerDict()
             self._l = defaultdict(LowerDict)  # reverse mapping
         else:

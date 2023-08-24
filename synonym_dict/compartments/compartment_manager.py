@@ -45,19 +45,30 @@ class CompartmentManager(SynonymDict):
         self.new_entry(name, *syns, parent=parent, **j)
 
     def load_dict(self, j):
+        """
+        Wow, this is a ticking bomb
+        assumes any named parent will eventually be found- and if not, it will simply loop forever
+        :param j:
+        :return:
+        """
         comps = j[self._entry_group]
         subs = []
+        _escape_count = 50
         while len(comps) > 0:
             for obj in comps:
-                if 'parent' in obj:
+                parent = obj.get('parent', None)
+                if parent:
                     try:
-                        self._d[obj['parent']]
+                        self._d[parent]
                     except KeyError:
                         subs.append(obj)
                         continue
                 self._add_from_dict(obj)
             comps = subs
             subs = []
+            _escape_count -= 1
+            if _escape_count == 0:
+                raise KeyError('missing parents %s' % comps)
 
     def _list_entries(self):
         return [c for c in self.objects]

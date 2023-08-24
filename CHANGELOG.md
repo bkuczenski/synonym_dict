@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.2.4 (2023-08-23)
+
+Ignore 'parent': None; detect missing parent compartments
+
 ### 0.2.3 (2023-02-03)
 
 Added a new testcase for merging nonstandard CAS. Removed some verbose output from `CompartmentManager`

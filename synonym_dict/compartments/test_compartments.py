@@ -37,7 +37,6 @@ class CompartmentContainer(object):
             self.assertListEqual(e.as_list(), ['emissions', 'emissions to air', 'emissions to urban air'])
             self.assertTupleEqual(tuple(e), ('emissions', 'emissions to air', 'emissions to urban air'))
 
-
     class CompartmentManagerTest(TestContainer.SynonymDictTest):
         """
         What do we want compartment managers to do?
@@ -76,6 +75,20 @@ class CompartmentContainer(object):
         def test_add_from_dict(self):
             self._add_water_dict()
             self.assertEqual(str(self.cm['water']), 'water emissions')
+
+        def test_add_none_parent(self):
+            self.cm.load_dict({'Compartments': [
+                {'name': 'A non-emission',
+                 'synonyms': ['an un-emission'],
+                 'parent': None}]})
+            self.assertEqual(self.cm['A non-emission'].parent, None)
+
+        def test_detect_missing_parent(self):
+            with self.assertRaises(KeyError):
+                self.cm.load_dict({'Compartments': [
+                    {'name': 'A non-emission',
+                     'synonyms': ['an un-emission'],
+                     'parent': 'none'}]})
 
         def test_0_add_hier(self):
             self.cm.add_compartments(['emissions', 'emissions to air', 'emissions to urban air'])
