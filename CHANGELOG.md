@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.2.5 (2024-09-22)
+
+Suppress useless "merging x into y" messages; catch a bad glitch where merging an entry
+with itself causes it to be deleted
+
 ### 0.2.4 (2023-08-23)
 
 Ignore 'parent': None; detect missing parent compartments

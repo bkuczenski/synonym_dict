@@ -123,7 +123,7 @@ class CompartmentManager(SynonymDict):
         :param ent:
         :return:
         """
-        print('merging %s into %s' % (ent, existing_entry))
+        # print('merging %s into %s' % (ent, existing_entry))  # this is really not doing anyone any good
         if ent.parent is not None:
             if not ent.top() is existing_entry.top():
                 raise InconsistentLineage('"%s": existing top %s | incoming top %s' % (ent,

@@ -285,6 +285,8 @@ class SynonymDict(object):
         """
         ob1 = self._d[first]
         ob2 = self._d[second]
+        if ob1 is ob2:
+            return
         self.remove_entry(ob2)
         if child:
             self._add_child(ob1, ob2)
