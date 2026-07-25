@@ -10,7 +10,7 @@ class NotSupported(Exception):
     pass
 
 
-cas_regex = re.compile('^0*([0-9]{2,6})(\W?)([0-9]{2})\\2([0-9])$')
+cas_regex = re.compile("^0*([0-9]{2,6})(\\W?)([0-9]{2})\\2([0-9])$")
 
 
 class InvalidCasNumber(Exception):
@@ -32,6 +32,7 @@ def _validate_numeric_input(cas):
     tup0 = int((cas - tup1) / 100)
     return str(tup0), str(tup1), str(tup2)
 '''
+
 
 def _validate_string_input(cas):
     match = cas_regex.match(cas)

@@ -1,5 +1,12 @@
 # Changelog
 
+### 0.2.6 (2026-07-24)
+
+Change behavior of adding compartments to prohibit omission of intervening descendants. See `test_omitted_descendants` 
+in `test_compartmets.py`.  This was causing conflicts when reading the very extensively compartmented TRACI 2.2.
+
+Also fixed a regex bug in `cas_number.py`
+
 ### 0.2.5 (2024-09-22)
 
 Suppress useless "merging x into y" messages; catch a bad glitch where merging an entry
