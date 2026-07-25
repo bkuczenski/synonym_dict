@@ -221,8 +221,9 @@ class CompartmentContainer(object):
         '''
         Potential Glitch cases:
          * relative add
-         * omitted descendant -> still valid
+         * omitted descendant -> should not be valid (e.g. troposphere/urban/ground-level vs troposphere/ground-level)
          * conflict in specified parent -> InconsistentLineage
+         * omitted head, i.e. relative add -> should be valid
         '''
         def test_relative_add(self):
             self._add_water_dict()
@@ -232,9 +233,16 @@ class CompartmentContainer(object):
             self.assertListEqual(ud.as_list(), ['Emissions', 'water emissions', 'lake water'])
 
         def test_omitted_descendant(self):
+            # changed in 0.2.6
+            self.cm.add_compartments(['emissions', 'to air', 'to urban air'])  # confirm that this exists
+            with self.assertRaises(InconsistentLineage):
+                self.cm.add_compartments(['emissions', 'to urban air', 'to urban center'])
+
+        def test_omitted_head(self):
+            # added in 0.2.6
             ua = self.cm.add_compartments(['emissions', 'to air', 'to urban air'])  # confirm that this exists
-            uc = self.cm.add_compartments(['emissions', 'to urban air', 'to urban center'])
-            self.assertIs(ua, uc.parent)
+            uc = self.cm.add_compartments(['to urban air', 'to urban center'])
+            self.assertIs(uc.parent, ua)
 
         def test_inconsistent_lineage(self):
             """

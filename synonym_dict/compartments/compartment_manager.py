@@ -174,7 +174,7 @@ class CompartmentManager(SynonymDict):
             new = self.get(c)
             if current is None:
                 return new
-            if new.is_subcompartment(current):
+            if new.parent is current:
                 return new
             if new.parent is None:
                 new.parent = current
@@ -230,7 +230,7 @@ class CompartmentManager(SynonymDict):
                     raise e
 
             current = new
-        self.add_synonym(current.name, auto_name)
+        self.add_synonym(current.name, auto_name)  # tuple gets cast to a string for storage
         return current
 
     def _is_known_compartment(self, item):
