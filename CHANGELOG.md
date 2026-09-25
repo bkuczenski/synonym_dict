@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.2.7 (2026-09-24)
+
+Restrict the allowed sloppiness of finding compartments by tuple. If users specify a tuple, they must not 
+skip compartments. (`CompartmentManager.__getitem__()`). This basically finishes the passive half of 0.2.6.
+
 ### 0.2.6 (2026-07-24)
 
 Change behavior of adding compartments to prohibit omission of intervening descendants. See `test_omitted_descendants` 
