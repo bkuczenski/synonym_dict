@@ -117,6 +117,10 @@ class CompartmentContainer(object):
             cx = self.cm.add_compartments(())
             self.assertIs(cx, self.cm._null_entry)
 
+        def test_retrieve_null(self):
+            cx = self.cm[()]
+            self.assertIs(cx, self.cm._null_entry)
+
         def test_toplevel(self):
             self.cm.add_compartments(['social hotspots', 'labor', 'child labor'])
             self.assertIn('social hotspots', (str(x) for x in self.cm.top_level_compartments))
@@ -189,7 +193,7 @@ class CompartmentContainer(object):
         def test_cross_lineage(self):
             self.cm.add_compartments(['emissions', 'to water', 'freshwater'])
             self.cm.add_compartments(['emissions', 'to air', 'indoor'])
-            with self.assertRaises(InconsistentLineage):
+            with self.assertRaises(KeyError):
                 self.cm.__getitem__(('emissions', 'to air', 'freshwater'))
 
         def test_distinct_lineage(self):
@@ -200,7 +204,7 @@ class CompartmentContainer(object):
             self.assertIs(fc.parent, self.cm['fuels', 'coal'])
             self.assertIs(hc.parent, self.cm['heat', 'coal'])
             self.assertIs(fc, self.cm['coal', 'bituminous'])
-            with self.assertRaises(InconsistentLineage):
+            with self.assertRaises(KeyError):
                 ''' # this doesn't work because the user's specification is ambiguous in conflicting ways. 
                 There is no way for the manager to know that 'coal' is an acceptable way to refer to 'heat, coal'
                 because at the time 'heat', 'coal' was disclosed to it, 'coal' already had a meaning. user authorized
@@ -291,6 +295,19 @@ class CompartmentContainer(object):
             rw = self.cm.add_compartments(['resources', 'water'], conflict='rename')
             self.assertIs(rw.parent, self.cm['resources'])
             self.assertEqual(rw.name, 'Resources, water')
+
+        def test_ambiguous_lineage(self):
+            self.cm.new_entry('Emissions', 'emission')
+            aq = self.cm.add_compartments(['emission', 'to water', 'subterranean', 'fresh water body', 'aquifer'])
+            rv = self.cm.add_compartments(['emission', 'to water', 'fresh water body', 'river'], conflict='rename')
+            self.assertIs(self.cm['fresh water body'], aq.parent)
+            self.assertIs(self.cm['to water, fresh water body'], rv.parent)
+            with self.assertRaises(KeyError):
+                self.cm.__getitem__(('Emissions', 'to water', 'fresh water body', 'aquifer'))
+            self.assertIs(self.cm.__getitem__(('Emissions', 'to water', 'subterranean', 'fresh water body', 'aquifer')),
+                          aq)
+            self.assertIs(self.cm.__getitem__(('Emissions', 'to water', 'fresh water body', 'river')),
+                          rv)
 
         def test_as_list(self):
             r_l = ['elementary flows', 'resources', 'water', 'subterranean']

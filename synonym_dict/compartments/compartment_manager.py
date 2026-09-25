@@ -150,7 +150,7 @@ class CompartmentManager(SynonymDict):
 
     @staticmethod
     def _tuple_to_name(comps):
-        return '; '.join(filter(None, comps))
+        return '; '.join(filter(lambda x: bool(x) and (x.lower() not in NONSPECIFIC_LOWER), comps))
 
     def _check_subcompartment_lineage(self, current, c):
         """
@@ -224,8 +224,7 @@ class CompartmentManager(SynonymDict):
                 elif conflict == 'skip':
                     new = current
                 elif conflict == 'rename':
-                    new_c = ', '.join([current.name, c])
-                    new = self._check_subcompartment_lineage(current, new_c)
+                    new = self._check_subcompartment_lineage(current, self._fuller_name(c, current))
                 else:
                     raise e
 
@@ -234,16 +233,24 @@ class CompartmentManager(SynonymDict):
         return current
 
     def _is_known_compartment(self, item):
+        """
+        Helper function for __getitem__, which tries to match the supplied tuple to an existing subcompartment with
+        a lineage that is consistent with the spec
+        :param item:
+        :return:
+        """
+        # first try the straight up name. maybe we don't need any more, because this is always added as a base term
+        try:
+            return self.__getitem__(self._tuple_to_name(item))
+        except KeyError:
+            pass
         e = None
         for i in item:
             if str(i).lower() in NONSPECIFIC_LOWER:
                 continue
             g = self.__getitem__(i)
-            if e and not g.is_subcompartment(e):
-                try:
-                    g = self.__getitem__(self._fuller_name(i, e))
-                except KeyError:
-                    raise InconsistentLineage(item, i, g)
+            if e and g.parent is not e:
+                g = self.__getitem__(self._fuller_name(i, e))
             e = g
         return e
 
@@ -253,7 +260,9 @@ class CompartmentManager(SynonymDict):
         except KeyError:
             if isinstance(item, tuple):
                 match = self._is_known_compartment(item)  # or else KeyError
-                self.add_synonym(match, item)
+                # self.add_synonym(match, item)  # premature (destructive) optimization
+                if match is None:
+                    return self._null_entry
                 return match
             elif str(item).lower() in NONSPECIFIC_LOWER:
                 if isinstance(item, self._syn_type):
